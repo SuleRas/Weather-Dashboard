@@ -1,4 +1,4 @@
-var apiKey = "55df0bfb703eebc6f491de4ed386bec6"; //
+var apiKey = "55df0bfb703eebc6f491de4ed386bec6";
 var today = moment().format("L");
 var searchHistoryList = [];
 
@@ -44,7 +44,10 @@ function buildFiveDayForecast(array) {
       "src",
       "http://openweathermap.org/img/wn/" + day.weather[0].icon + ".png"
     );
-    $("#fiveDay").append(col.append(card.append(title.append(image), temp)));
+
+    $("#fiveDay").append(
+      col.append(card.append(title.append(image, day.temp.day)))
+    );
   }
 }
 
