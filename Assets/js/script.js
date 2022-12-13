@@ -1,6 +1,15 @@
 var apiKey = "55df0bfb703eebc6f491de4ed386bec6";
 var today = moment().format("L");
-var searchHistoryList = [];
+// var searchHistoryList = [];
+
+var dataFromLS = JSON.parse(localStorage.getItem("searchHistory"));
+
+if (!dataFromLS) {
+  localStorage.setItem(
+    localStorage.getItem("searchHistory"),
+    JSON.stringify([])
+  );
+}
 
 function currentCondition(city) {
   var queryURL = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`;
@@ -10,9 +19,6 @@ function currentCondition(city) {
       return Response.json();
     })
     .then(function (data) {
-      //   console.log(data);
-      //   console.log(data[0].lat);
-      //   console.log(data[0].lon);
       oneCallApi(data[0].lat, data[0].lon, data[0].name);
     });
 }
@@ -24,16 +30,19 @@ function oneCallApi(lat, lon, city) {
       return Response.json();
     })
     .then(function (data) {
+      console.log(data);
       $("#weatherContent").css("display", "block");
-      //console.log("THIS IS ONE CALL DATA", data);
-      // console.log(data.current.temp);
-      $("#currentTemp").text(data.current.temp);
+      $("#currentTemp").text("Temperature: " + data.current.temp + " F");
+      $("#humidity").text("Humidity: " + data.current.humidity + " %");
+      $("#uvindex").text("UV index: " + data.current.uvi);
+      $("#windspeed").text("Wind Speed: " + data.current.wind_speed);
       buildFiveDayForecast(data.daily);
     });
 }
+
 function buildFiveDayForecast(array) {
   for (let index = 1; index < 6; index++) {
-    const day = array[index];
+    var day = array[index];
     console.log(day);
     var dateDisplay = moment.unix(day.dt).format("ddd");
     console.log(dateDisplay);
@@ -53,15 +62,24 @@ function buildFiveDayForecast(array) {
 
 $("#searchBtn").on("click", function () {
   var city = $("#enterCity").val().trim();
-  if (searchHistoryList.indexOf(city) === -1) {
-    searchHistoryList.push(city);
-    localStorage.setItem("searchHistory", JSON.stringify(searchHistoryList));
-    buildMenu();
-  }
+
+  var cityHistory = JSON.parse(localStorage.getItem("searchHistory"));
+
+  cityHistory.push(city);
+
+  localStorage.setItem("searchHistory", JSON.stringify(cityHistory));
+
+  buildMenu(cityHistory);
+
+  // if (searchHistoryList.indexOf(city) === -1) {
+  //   searchHistoryList.push(city);
+  //   localStorage.setItem("searchHistory", JSON.stringify(searchHistoryList));
+  // }
 
   currentCondition(city);
 });
-function buildMenu() {
+
+function buildMenu(searchHistoryList) {
   searchHistoryList.forEach(function (city) {
     var button = $("<button>")
       .text(city)
